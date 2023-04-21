@@ -8,13 +8,30 @@ import {
   Text,
   StatusBar,
   TouchableOpacity,
-  Linking,
+  Linking, Image
 } from "react-native";
+import { ImagePickerResponse, MediaType, launchCamera } from "react-native-image-picker";
 import Svg, { Path } from "react-native-svg";
 
 export const App = () => {
   const [whatsNextYCoord, setWhatsNextYCoord] = useState<number>(0);
+  const [filePath, setImage] = useState<ImagePickerResponse>({});
   const scrollViewRef = useRef<null | ScrollView>(null);
+
+  async function selectImage(type: MediaType) {
+      const result = await launchCamera({
+        mediaType: type,
+        maxWidth: 300,
+        maxHeight: 550,
+        quality: 1,
+        videoQuality: 'low',
+        durationLimit: 30, //Video max duration in seconds
+        saveToPhotos: true,
+      });
+  
+      console.log(result);
+      setImage(result);
+    }
 
   return (
     <>
@@ -28,10 +45,18 @@ export const App = () => {
           style={styles.scrollView}
         >
           <View style={styles.section}>
-            <Text style={styles.textLg}>Hello there,</Text>
-            <Text style={[styles.textXL, styles.appTitleText]} testID="heading">
-              Welcome Mobile 👋
-            </Text>
+          <TouchableOpacity
+                style={styles.whatsNextButton}
+                onPress={() => {
+                  selectImage('photo')
+                }}
+              >
+                <Image source={{uri: filePath.assets[0].uri}} style={styles.imageStyle}/> 
+                <Text style={[styles.textMd, styles.textCenter]}>
+                { JSON.stringify(filePath)}
+                </Text>
+              </TouchableOpacity>
+              {/* <Image source={{uri: filePath.assets[0].uri}} /> */}
           </View>
           <View style={styles.section}>
             <View style={styles.hero}>
@@ -700,6 +725,11 @@ const styles = StyleSheet.create({
   love: {
     marginTop: 12,
     justifyContent: "center",
+  },
+  imageStyle: {
+    width: 200,
+    height: 200,
+    margin: 5,
   },
 });
 

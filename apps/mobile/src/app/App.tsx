@@ -31,7 +31,7 @@ export const App = () => {
   const scrollViewRef = useRef<null | ScrollView>(null);
 
   async function takeImage(type: MediaType) {
-    const result = await launchCamera({
+    const response = await launchCamera({
       mediaType: type,
       maxWidth: 300,
       maxHeight: 550,
@@ -41,14 +41,24 @@ export const App = () => {
       saveToPhotos: true,
     });
 
-    if (result.didCancel) {
+    if (response.didCancel) {
+      alert('User cancelled camera picker');
       return;
-    } else if (result.errorCode) {
-      console.log(result.errorMessage);
+    } else if (response.errorCode === 'camera_unavailable') {
+      alert('Camera not available on device');
+      return;
+    } else if (response.errorCode === 'permission') {
+      alert('Permission not satisfied');
+      return;
+    } else if (response.errorCode === 'others') {
+      alert(response.errorMessage);
+      console.log(response.errorCode);
+      console.log(response.errorMessage);
       return;
     }
-    console.log(result);
-    setImage(result);
+
+    console.log(response);
+    setImage(response);
   }
 
   async function chooseImage(type: MediaType)  {
@@ -65,23 +75,18 @@ export const App = () => {
       if (response.didCancel) {
         alert('User cancelled camera picker');
         return;
-      } else if (response.errorCode == 'camera_unavailable') {
+      } else if (response.errorCode === 'camera_unavailable') {
         alert('Camera not available on device');
         return;
-      } else if (response.errorCode == 'permission') {
+      } else if (response.errorCode === 'permission') {
         alert('Permission not satisfied');
         return;
-      } else if (response.errorCode == 'others') {
+      } else if (response.errorCode === 'others') {
         alert(response.errorMessage);
+        console.log(response.errorCode);
+        console.log(response.errorMessage);
         return;
       }
-      // console.log('base64 -> ', response.base64);
-      // console.log('uri -> ', response.uri);
-      // console.log('width -> ', response.width);
-      // console.log('height -> ', response.height);
-      // console.log('fileSize -> ', response.fileSize);
-      // console.log('type -> ', response.type);
-      // console.log('fileName -> ', response.fileName);
       console.log(response);
       setImage(response);
   };
@@ -115,9 +120,9 @@ export const App = () => {
           contentInsetAdjustmentBehavior="automatic"
           style={styles.scrollView}
         >
-          <View style={styles.section}>
+          <View style={[styles.section, styles.heroTitle]}>
             <TouchableOpacity
-              style={styles.whatsNextButton}
+              style={[styles.whatsNextButton, styles.heroTitle]}
               onPress={() => {
                 takeImage('photo');
               }}
@@ -244,7 +249,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     flex: 1,
-    flexDirection: 'row',
+    // flexDirection: 'row',
   },
   heroTitleText: {
     color: '#ffffff',
